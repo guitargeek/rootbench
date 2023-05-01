@@ -11,7 +11,7 @@ namespace RooFitADBenchmarksUtils {
 
 enum backend { Reference, BatchMode, CodeSquashNumDiff, CodeSquashAD };
 template <typename F>
-void doBenchmarks(F func, int rangeMin, int rangeMax, int step, int numIterations = 100,
+void doBenchmarks(F func, int rangeMin, int rangeMax, int step, int numIterations = 10,
                   benchmark::TimeUnit unit = benchmark::kMillisecond)
 {
    // Run the minimization with the reference NLL
@@ -46,7 +46,8 @@ void randomizeParameters(const RooArgSet &parameters, ULong_t seed = 0)
       random->SetSeed(seed);
 
    for (auto param : parameters) {
-      auto par = static_cast<RooAbsRealLValue *>(param);
+      auto par = dynamic_cast<RooAbsRealLValue *>(param);
+      if(!par) continue;
       const double uni = random->Uniform();
       const double min = par->getMin();
       const double max = par->getMax();
