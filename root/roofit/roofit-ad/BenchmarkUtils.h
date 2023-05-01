@@ -11,7 +11,7 @@ namespace RooFitADBenchmarksUtils {
 
 enum backend { Reference, BatchMode, CodeSquashNumDiff, CodeSquashAD };
 template <typename F>
-void doBenchmarks(F func, int rangeMin, int rangeMax, int step, int numIterations = 10,
+void doBenchmarks(F func, int rangeMin, int rangeMax, int step, int numIterations = 1,
                   benchmark::TimeUnit unit = benchmark::kMillisecond)
 {
    // Run the minimization with the reference NLL

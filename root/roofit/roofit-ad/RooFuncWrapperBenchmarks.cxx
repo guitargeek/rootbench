@@ -102,6 +102,8 @@ static void BM_RooFuncWrapper_Minimization(benchmark::State &state)
 
 std::unique_ptr<RooAbsPdf> createModel(RooRealVar & x, std::string const& channelName)
 {
+   using namespace RooFit;
+
    auto prefix = [&](const char* name) { return name + std::string("_") + channelName; };
 
    RooRealVar c(prefix("c").c_str(), "c", -0.5, -0.8, 0.2);
@@ -112,21 +114,23 @@ std::unique_ptr<RooAbsPdf> createModel(RooRealVar & x, std::string const& channe
    RooRealVar mean1(prefix("mean1").c_str(), "mean of gaussians", 3, 0, 5);
    RooRealVar sigma1(prefix("sigma1").c_str(), "width of gaussians", 2.0, .5, 5.0);
    RooRealVar mean2(prefix("mean2").c_str(), "mean of gaussians", 6, 5, 10);
-   RooRealVar sigma2(prefix("sigma2").c_str(), "width of gaussians", 0.5, .1, 2.0);
+   RooRealVar sigma2(prefix("sigma2").c_str(), "width of gaussians", 1.0, .5, 2.0);
 
    RooGaussian sig1(prefix("sig1").c_str(), "Signal component 1", x, mean1, sigma1);
    RooGaussian sig2(prefix("sig2").c_str(), "Signal component 2", x, mean2, sigma2);
 
    // Build Chebychev polynomial pdf
-   RooRealVar a0(prefix("a0").c_str(), "a0", 0.3, 0., 0.5);
-   RooRealVar a1(prefix("a1").c_str(), "a1", 0.2, 0., 0.5);
-   RooChebychev bkg(prefix("bkg").c_str(), "Background", x, {a0, a1});
+   //RooRealVar a0(prefix("a0").c_str(), "a0", 0.3, 0., 0.5);
+   //RooRealVar a1(prefix("a1").c_str(), "a1", 0.2, 0., 0.5);
+   ////RooChebychev bkg(prefix("bkg").c_str(), "Background", x, {a0, a1});
+   //RooChebychev bkg(prefix("bkg").c_str(), "Background", x, {a0, RooConst(0.2)});
 
    // Sum the composite signal and background
    RooRealVar bkgfrac(prefix("bkgfrac").c_str(), "fraction of background", 0.2, 0.1, 0.25);
    RooRealVar sig1frac(prefix("sig1frac").c_str(), "fraction of signal", 0.2, 0.1, 0.25);
    RooRealVar sig2frac(prefix("sig2frac").c_str(), "fraction of signal", 0.2, 0.1, 0.25);
-   RooAddPdf model(prefix("model").c_str(), "g1+g2+a", {bkg, sig1, sig2, expo}, {bkgfrac, sig1frac, sig2frac});
+   //RooAddPdf model(prefix("model").c_str(), "g1+g2+a", {bkg, sig1, sig2, expo}, {bkgfrac, sig1frac, sig2frac});
+   RooAddPdf model(prefix("model").c_str(), "g1+g2+a", {sig1, sig2, expo}, {sig1frac, sig2frac});
 
    return std::unique_ptr<RooAbsPdf>{static_cast<RooAbsPdf*>(model.cloneTree())};
 }
@@ -154,13 +158,13 @@ static void BM_RooFuncWrapper_ManyParams_Minimization(benchmark::State &state)
    RooArgSet observables;
    RooArgSet models;
 
-   auto nChannels = 10;
+   auto nChannels = 15;
 
    for(std::size_t i = 0; i < nChannels; ++i) {
        std::string suffix = "_" + std::to_string(i + 1);
        auto obsName = "x" + suffix;
        auto x = std::make_unique<RooRealVar>(obsName.c_str(), obsName.c_str(), 0, 10.);
-       x->setBins(5);
+       x->setBins(1000);
 
        std::unique_ptr<RooAbsPdf> model{createModel(*x, std::to_string(i + 1))};
 
@@ -197,7 +201,7 @@ static void BM_RooFuncWrapper_ManyParams_Minimization(benchmark::State &state)
    //nllFunc.dumpCode();
 
    std::unique_ptr<RooMinimizer> m = nullptr;
-   for (auto _ : state) {
+
       int code = state.range(0);
       if (code == RooFitADBenchmarksUtils::backend::Reference) {
          m.reset(new RooMinimizer(*nllRef));
@@ -215,11 +219,14 @@ static void BM_RooFuncWrapper_ManyParams_Minimization(benchmark::State &state)
       //m->setPrintEvalErrors(-1);
       m->setStrategy(0);
       params.assign(origParams);
+
+   //m->hesse();
+   for (auto _ : state) {
       m->minimize("Minuit2");
    }
    //m->save()->Print();
-   std::cout << m->save()->status() << std::endl;
-   std::cout << m->save()->minNll() << std::endl;
+   std::cout << "Status   : " << m->save()->status() << std::endl;
+   std::cout << "Min. NLL : " << m->save()->minNll() << std::endl;
 }
 
 int main(int argc, char **argv)
