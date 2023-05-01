@@ -120,10 +120,10 @@ std::unique_ptr<RooAbsPdf> createModel(RooRealVar & x, std::string const& channe
    RooGaussian sig2(prefix("sig2").c_str(), "Signal component 2", x, mean2, sigma2);
 
    // Build Chebychev polynomial pdf
-   //RooRealVar a0(prefix("a0").c_str(), "a0", 0.3, 0., 0.5);
-   //RooRealVar a1(prefix("a1").c_str(), "a1", 0.2, 0., 0.5);
-   ////RooChebychev bkg(prefix("bkg").c_str(), "Background", x, {a0, a1});
-   //RooChebychev bkg(prefix("bkg").c_str(), "Background", x, {a0, RooConst(0.2)});
+   RooRealVar a0(prefix("a0").c_str(), "a0", 0.3, 0., 0.5);
+   RooRealVar a1(prefix("a1").c_str(), "a1", 0.2, 0., 0.5);
+   //RooChebychev bkg(prefix("bkg").c_str(), "Background", x, {a0, a1});
+   RooChebychev bkg(prefix("bkg").c_str(), "Background", x, {a0, RooConst(0.2)});
 
    // Sum the composite signal and background
    RooRealVar bkgfrac(prefix("bkgfrac").c_str(), "fraction of background", 0.2, 0.1, 0.25);
@@ -133,6 +133,7 @@ std::unique_ptr<RooAbsPdf> createModel(RooRealVar & x, std::string const& channe
    RooAddPdf model(prefix("model").c_str(), "g1+g2+a", {sig1, sig2, expo}, {sig1frac, sig2frac});
 
    return std::unique_ptr<RooAbsPdf>{static_cast<RooAbsPdf*>(model.cloneTree())};
+   //return std::unique_ptr<RooAbsPdf>{static_cast<RooAbsPdf*>(sig1.cloneTree())};
 }
 
 static void BM_RooFuncWrapper_ManyParams_Minimization(benchmark::State &state)
@@ -158,13 +159,15 @@ static void BM_RooFuncWrapper_ManyParams_Minimization(benchmark::State &state)
    RooArgSet observables;
    RooArgSet models;
 
-   auto nChannels = 15;
+   auto nChannels = 30;
+   //auto nChannels = 1;
 
    for(std::size_t i = 0; i < nChannels; ++i) {
        std::string suffix = "_" + std::to_string(i + 1);
        auto obsName = "x" + suffix;
        auto x = std::make_unique<RooRealVar>(obsName.c_str(), obsName.c_str(), 0, 10.);
-       x->setBins(1000);
+       //x->setBins(1000);
+       x->setBins(20);
 
        std::unique_ptr<RooAbsPdf> model{createModel(*x, std::to_string(i + 1))};
 
