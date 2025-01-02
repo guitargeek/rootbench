@@ -1,14 +1,14 @@
 # BasedOnStyle:  LLVM
 AccessModifierOffset: -3
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: None
+AlignConsecutiveAssignments: false
 # This would be nice to have but seems to also (mis)align function parameters
-AlignConsecutiveDeclarations: None
-AlignEscapedNewlines: Left
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlinesLeft: true
 AlignOperands:   true
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortBlocksOnASingleLine: Never
+AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: false
@@ -17,12 +17,12 @@ AllowShortLoopsOnASingleLine: false
 # AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: Yes
+AlwaysBreakTemplateDeclarations: true
 BinPackArguments: true
 BinPackParameters: true
 BraceWrapping:
   AfterClass:      false
-  AfterControlStatement: Never
+  AfterControlStatement: false
   AfterEnum:       false
   AfterFunction:   true
   AfterNamespace:  false
@@ -32,13 +32,13 @@ BraceWrapping:
   BeforeCatch:     false
   BeforeElse:      false
   IndentBraces:    false
-BreakBeforeBinaryOperators: None
+BreakBeforeBinaryOperators: false
 BreakBeforeBraces: Custom
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
 ColumnLimit:     120
 CommentPragmas:  '^ IWYU pragma:'
-ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 3
 ContinuationIndentWidth: 3
 Cpp11BracedListStyle: true
@@ -46,6 +46,32 @@ DerivePointerAlignment: false
 DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
 ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
+IncludeCategories:
+  - Regex:           '^("|<)T'
+    Priority:        4
+  - Regex:           '^("|<)ROOT/'
+    Priority:        5
+  - Regex:           '^<.*\.h>'
+    Priority:        1
+  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+    Priority:        2
+  - Regex:           '^(<|"(gtest|isl|json)/)'
+    Priority:        3
+  - Regex:           '.*'
+    Priority:        6
+   # Order alphabetically and by generality the included header files.
+  - Regex:           '^"[^/]+\"'
+    Priority:        10
+  - Regex:           '^"ROOT/'
+    Priority:        15
+  - Regex:           '^"cling/'
+    Priority:        20
+  - Regex:           '^"clang/'
+    Priority:        30
+  - Regex:           '^"llvm/'
+    Priority:        40
+  - Regex:           '^<'
+    Priority:        50
 IndentCaseLabels: false
 IndentWidth:     3
 IndentWrappedFunctionNames: false
@@ -64,8 +90,8 @@ PenaltyBreakString: 1000
 PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 10
 PointerAlignment: Right
-ReflowComments: true
-SortIncludes: Never
+ReflowComments:  true
+SortIncludes: false
 SpaceAfterCStyleCast: false
 SpaceBeforeAssignmentOperators: true
 # You want this : enable it if you have https://reviews.llvm.org/D32525
@@ -78,23 +104,6 @@ SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard:        c++11
+Standard:        Cpp11
 TabWidth:        3
 UseTab:          Never
-
-# Order alphabetically and by generality the included header files.
-IncludeCategories:
-  - Regex:           '^"[^/]+\"'
-    Priority:        10
-  - Regex:           '^("|<)T'
-    Priority:        12
-  - Regex:           '^"ROOT/'
-    Priority:        15
-  - Regex:           '^"cling/'
-    Priority:        20
-  - Regex:           '^"clang/'
-    Priority:        30
-  - Regex:           '^"llvm/'
-    Priority:        40
-  - Regex:           '^<'
-    Priority:        50
